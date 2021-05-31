@@ -4,7 +4,6 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import pandas as pd
 
-
 def check_holdouts(respo, holdout_full):
     is_valid = []
     for respondent in respo:
@@ -25,18 +24,19 @@ def check_holdouts(respo, holdout_full):
     return is_valid
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    # all displayed profiles for every respondents
     full_profile = pd.read_csv("Full_profiles.CSV", delimiter=";")
+    # only holdouts displayed to user
     holdouts = pd.read_csv("holdouts.CSV", delimiter=";")
 
     all_respondents = pd.unique(full_profile["Response ID"])
     holdout_respondents = pd.unique(holdouts["Response ID"])
+
     # symmetric difference for respondents which selected 3 times the none option
     always_none_respondents = list(set(all_respondents) - set(holdout_respondents))
 
-    # print(holdouts[["Response ID", "Task ID", "Concept ID", "Selected"]])
-    # Summarray
+    # Summary
     tasks = 7
     concepts = 2
     respondents_full = len(all_respondents)
@@ -50,7 +50,9 @@ if __name__ == '__main__':
         valid_respondents.append(resp)
     print("All respondents: " + str(respondents_full))
     print("Holdout respondents: " + str(len(valid_respondents)))
-    print("ValidationRate = " + str(round(((len(valid_respondents) / respondents_full) * 100), 2)) + "% of all respondents are succesfull in the holdout validation")
+    print("ValidationRate = " + str(round(((len(valid_respondents) / respondents_full) * 100), 2))
+          + "% of all respondents are succesfull in the holdout validation")
+
 
 
 

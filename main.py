@@ -40,8 +40,11 @@ def to_long_format(wide, r_id):
         if wide.iloc[i]["Response ID"] in r_id:
             # is it the second concept? if true get row 1 and row 2 , row 3 is none option
             if (i-1) % 2 == 0:
+                print("index: " + str(i))
                 row1 = wide.iloc[i - 1]
                 row2 = wide.iloc[i]
+                print(row1)
+                print(row2)
                 # creating 3 rows for the long dataset and adding those to the rows_list
                 row1_long = []
                 row2_long = []
@@ -49,6 +52,7 @@ def to_long_format(wide, r_id):
                 # adding the mapping from wide fromat (1-4) to binary long format (0,1)
                 choices = {1: [1, 0, 0, 0], 2: [0, 1, 0, 0], 3: [0, 0, 1, 0], 4: [0, 0, 0, 1]} # hashmap-> wide->long
                 for j in range(len(row2)):
+                    print("index j:" + str(j))
                     # Respondent, Task ID
                     if j == 0 or j == 1:
                         row1_long.append(row1[j])
@@ -72,17 +76,21 @@ def to_long_format(wide, r_id):
                         row3_long.append(1)
                     # selected, if case ow1[j] == 0 & row2[j] == 0: none option is selected
                     elif j == 10:
-                        if row1[j] == 0 & row2[j] == 0:
+                        if row1[j] == 0 and row2[j] == 0:
+                            print(row1[j])
+                            print(row2[j])
                             row1_long.append(0)
                             row2_long.append(0)
                             row3_long.append(1)
                         else:
+                            #[[1621145591, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1]
                             row1_long.append(row1[j])
                             row2_long.append(row2[j])
                             row3_long.append(0)
                 rows_list.append(row1_long)
                 rows_list.append(row2_long)
                 rows_list.append(row3_long)
+    print(rows_list)
     return rows_list
 
 
@@ -136,6 +144,7 @@ if __name__ == '__main__':
     # Data Cleaning
     # getting valid respondents (checking holdouts) (list of valid respondents
     valid_respondents = validate_holdouts()
+    #valid_respondents = [1621145591, 1621146858]
 
     # Adding User who picked 3 times none in the holdouts
     for resp in always_none_respondents:

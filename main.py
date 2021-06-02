@@ -167,7 +167,6 @@ if __name__ == '__main__':
     # Summary for complete Dataset not on filtered one
     print("All respondents: " + str(len(all_respondents)))
     print("Holdout positive respondents: " + str(len(holdout_respondents)))
-    print("Holdout negative respondents: " + str(len(all_respondents)-(len(holdout_respondents))))
     print("cleaned respondents: " + str(len(valid_respondents)))
     print("ValidationRate = " + str(round(((len(valid_respondents) / len(all_respondents)) * 100), 2))
           + "% of all respondents are succesfull in the holdout validation")

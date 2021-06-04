@@ -22,21 +22,21 @@ def validate_holdouts():
         # The dataset size various from 0 to 3, depending on how many times a respondent selected 'none'
         # QuestionPro doesnt export the row, if 'none is selected'
 
-        # dataframe containing rows of selected holdout profiles
-        profile_respondent = holdouts.loc[
+        # dataframe containing selected holdout profiles
+        selected_profiles = holdouts.loc[
             (holdouts["Response ID"] == respondent) & (holdouts["Selected"] == 1)]
 
-        size = len(profile_respondent)  # size indicates how many times 'none option' was selected
+        size = len(selected_profiles)  # size indicates how many times 'none option' was selected
 
         if size == 1:  # size 1 => respondent selected 2 times 'none'
-            if (profile_respondent.iloc[0]["Concept ID"] == 3) or (profile_respondent.iloc[0]["Concept ID"]) == 4:
+            if (selected_profiles.iloc[0]["Concept ID"] == 3) or (selected_profiles.iloc[0]["Concept ID"]) == 4:
                 is_valid.append(respondent)
         else:
             if size == 2:  # size 2 => respondent selected 1 time 'none': e.g. concept 1  == concept 5
-                if (profile_respondent.iloc[0]["Concept ID"] + 4) == profile_respondent.iloc[1]["Concept ID"]:
+                if (selected_profiles.iloc[0]["Concept ID"] + 4) == selected_profiles.iloc[1]["Concept ID"]:
                     is_valid.append(respondent)
             else:  # size 3 => no none option: same as size 2
-                if (profile_respondent.iloc[0]["Concept ID"] + 4) == profile_respondent.iloc[2]["Concept ID"]:
+                if (selected_profiles.iloc[0]["Concept ID"] + 4) == selected_profiles.iloc[2]["Concept ID"]:
                     is_valid.append(respondent)
     return is_valid  # list of valid respondent ids
 
@@ -52,11 +52,8 @@ def to_long_format(wide, r_id):
         if wide.iloc[i]["Response ID"] in r_id:
             # is it the second concept? if true get row 1 and row 2 , row 3 is none option
             if (i - 1) % 2 == 0:
-                print("index: " + str(i))
                 row1 = wide.iloc[i - 1]
                 row2 = wide.iloc[i]
-                print(row1)
-                print(row2)
                 # creating 3 rows for the long dataset and adding those to the rows_list
                 row1_long = []
                 row2_long = []
@@ -64,7 +61,6 @@ def to_long_format(wide, r_id):
                 # adding the mapping from wide format (1-4) to binary long format (0,1)
                 choices = {1: [1, 0, 0, 0], 2: [0, 1, 0, 0], 3: [0, 0, 1, 0], 4: [0, 0, 0, 1]}  # hashmap-> wide->long
                 for j in range(len(row2)):
-                    print("index j:" + str(j))
                     # Respondent, Task ID
                     if j == 0 or j == 1:
                         row1_long.append(row1[j])
@@ -90,8 +86,6 @@ def to_long_format(wide, r_id):
                     elif j == 10:
                         # If concept 1 and concept 2 is not selected, concept 3 'none' is selected
                         if row1[j] == 0 and row2[j] == 0:
-                            print(row1[j])
-                            print(row2[j])
                             row1_long.append(0)
                             row2_long.append(0)
                             row3_long.append(1)
@@ -102,7 +96,6 @@ def to_long_format(wide, r_id):
                 rows_list.append(row1_long)
                 rows_list.append(row2_long)
                 rows_list.append(row3_long)
-    print(rows_list)
     return rows_list
 
 
@@ -112,7 +105,7 @@ if __name__ == '__main__':
     # reading holdouts, 3 holdout tasks each respondent
     holdouts = pd.read_csv("holdouts.CSV", delimiter=";")
     # reading a list of respondents im interested in (filtering done by spss)
-    conditionCSV = "only_female.csv"
+    conditionCSV = "onlyOne.csv"
     interested_respondents = pd.read_csv(conditionCSV)
     # addtional Information for CBCA
     # tasks = 7

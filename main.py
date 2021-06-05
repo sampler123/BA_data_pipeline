@@ -12,11 +12,11 @@ The script transforms the QuestionPro wide format into long format. It changes t
 """
 
 import pandas as pd  # third-party library
-import numpy as np  # third-party library
+import numpy as np  # third-party library #  not necessary
 
 
 def validate_holdouts():
-    is_valid = []  # return list of valid respondents
+    is_valid = []  # return list of valid respondents # use set
     for respondent in holdout_respondents:
         # Iterating through respondentsIDs
         # The dataset size various from 0 to 3, depending on how many times a respondent selected 'none'
@@ -74,7 +74,7 @@ def to_long_format(wide, r_id):
                     # goals 3, tracking 4, reinforcement 5, self-efficay 6, social support 7, provider 8
                     elif 3 <= j <= 8:
                         # to list() is mandatory, because append works only for lists not numpy arrays
-                        row1_long = np.concatenate((row1_long, choices.get(row1[j])), axis=None).tolist()
+                        row1_long = np.concatenate((row1_long, choices.get(row1[j])), axis=None).tolist() #use list.extend() or just ADD THEM.
                         row2_long = np.concatenate((row2_long, choices.get(row2[j])), axis=None).tolist()
                         row3_long = np.concatenate((row3_long, [0, 0, 0, 0]), axis=None).tolist()
                     # none option level
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     holdouts = pd.read_csv("holdouts.CSV", delimiter=";")
     # reading a list of respondents im interested in (filtering done by spss)
     conditionCSV = "onlyOne.csv"
-    interested_respondents = pd.read_csv(conditionCSV)
+    interested_respondents = pd.read_csv(conditionCSV) # Welche Spalte sind die repsondents?
     # addtional Information for CBCA
     # tasks = 7
     # concepts = 2
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     holdout_respondents = pd.unique(holdouts["Response ID"])
 
     # symmetric difference for respondents which selected 3 times the none option (These are valid respondents)
-    always_none_respondents = list(set(all_respondents) - set(holdout_respondents))
+    always_none_respondents = list(set(all_respondents) - set(holdout_respondents)) # why list conversion?
 
     # getting valid respondents (checking holdouts) (list of valid respondents)
     valid_respondents = validate_holdouts()
@@ -155,9 +155,9 @@ if __name__ == '__main__':
     # final dataset header in long format (including levels not attributes)
     final_arr = np.concatenate((['Response ID', 'Task ID', 'Concept ID'], goals_level, tracking_level,
                                 reinforcement_level, selfefficay_level, socialsupport_level,
-                                provider_level, ['none', 'selected']), axis=None).tolist()
+                                provider_level, ['none', 'selected']), axis=None).tolist() # use list.extend or itertools.chain or just ADD THEM.
     # getting Data into long format, adding None options
-    long_format = (to_long_format(full_profile, (np.intersect1d(valid_respondents, interested_respondents))))
+    long_format = (to_long_format(full_profile, (np.intersect1d(valid_respondents, interested_respondents)))) # use set.intersection()
     df_final = pd.DataFrame(long_format, columns=final_arr)
 
     # adding time variable for Cox Regression (Backhaus et.al) (-(selected-2))

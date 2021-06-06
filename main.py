@@ -101,11 +101,11 @@ def to_long_format(wide, r_id):
 
 if __name__ == '__main__':
     # reading "Full Profile" for all Respondents, 7 conjoint tasks each respondent
-    full_profile = pd.read_csv("Full_profiles.CSV", delimiter=";")
+    full_profile = pd.read_csv("cbca_profiles.CSV", delimiter=";")
     # reading holdouts, 3 holdout tasks each respondent
-    holdouts = pd.read_csv("holdouts.CSV", delimiter=";")
+    holdouts = pd.read_csv("cbca_holdouts.CSV", delimiter=";")
     # reading a list of respondents im interested in (filtering done by spss)
-    conditionCSV = "onlyOne.csv"
+    conditionCSV = "seg_females.csv"
     interested_respondents = pd.read_csv(conditionCSV)
     # addtional Information for CBCA
     # tasks = 7
@@ -167,8 +167,7 @@ if __name__ == '__main__':
     df_final.to_csv(conditionCSV[:-4] + "_long_clean.csv", sep=";", index=False)
 
     # Summary for complete Dataset not on filtered one
-    print("All respondents: " + str(len(all_respondents)))
-    print("Holdout positive respondents: " + str(len(holdout_respondents)))
-    print("cleaned respondents: " + str(len(valid_respondents)))
+    print("Number of respondents: " + str(len(all_respondents)))
+    print("Number of consistent respondents: " + str(len(valid_respondents)))
     print("ValidationRate = " + str(round(((len(valid_respondents) / len(all_respondents)) * 100), 2))
-          + "% of all respondents are succesfull in the holdout validation")
+          + "% of all respondents are consistent in their holdout selection")

@@ -41,61 +41,66 @@ def validate_holdouts():
     return is_valid  # list of valid respondent ids
 
 
-def to_long_format(wide, r_id):
+def to_long_format(wide):
     rows_list = []
-    for i in range(0, len(wide.index)):
+    for i in range(0, len(wide)):
         # QuestionPro does not export a third row for concept 3 none
         # second rows are the interesting ones, if more concepts are displayed
         # to the user "(i-1) % 2 == 0" has to be updated
         # Creating a List of Rows -> transforming from attributes to levels + adding none option
-        # checking if respondent belongs to the filtered respondent list (which im interested in)
-        if wide.iloc[i]["Response ID"] in r_id:
-            # is it the second concept? if true get row 1 and row 2 , row 3 is none option
-            if (i - 1) % 2 == 0:
-                row1 = wide.iloc[i - 1]
-                row2 = wide.iloc[i]
-                # creating 3 rows for the long dataset and adding those to the rows_list
-                row1_long = []
-                row2_long = []
-                row3_long = []
-                # adding the mapping from wide format (1-4) to binary long format (0,1)
-                choices = {1: [1, 0, 0, 0], 2: [0, 1, 0, 0], 3: [0, 0, 1, 0], 4: [0, 0, 0, 1]}  # hashmap-> wide->long
-                for j in range(len(row2)):
-                    # Respondent, Task ID
-                    if j == 0 or j == 1:
-                        row1_long.append(row1[j])
-                        row2_long.append(row2[j])
-                        row3_long.append(row2[j])
-                    # Concept ID
-                    elif j == 2:
-                        row1_long.append(row1[j])
-                        row2_long.append(row2[j])
-                        row3_long.append(3)
-                    # goals 3, tracking 4, reinforcement 5, self-efficay 6, social support 7, provider 8
-                    elif 3 <= j <= 8:
-                        # to list() is mandatory, because append works only for lists not numpy arrays
-                        row1_long = np.concatenate((row1_long, choices.get(row1[j])), axis=None).tolist()
-                        row2_long = np.concatenate((row2_long, choices.get(row2[j])), axis=None).tolist()
-                        row3_long = np.concatenate((row3_long, [0, 0, 0, 0]), axis=None).tolist()
-                    # none option level
-                    elif j == 9:
+
+        # is it the second concept? if true get row 1 and row 2 , row 3 is none option
+        if (i - 1) % 2 == 0:
+            row1 = wide.iloc[i - 1]
+            row2 = wide.iloc[i]
+            # creating 3 rows for the long dataset and adding those to the rows_list
+            row1_long = []
+            row2_long = []
+            row3_long = []
+            # adding the mapping from wide format (1-4) to binary long format (0,1)
+            choices = {1: [1, 0, 0, 0], 2: [0, 1, 0, 0], 3: [0, 0, 1, 0], 4: [0, 0, 0, 1]}  # hashmap-> wide->long
+            for j in range(len(row2)):
+                # Respondent
+                if j == 0:
+                    row1_long.append(row1[j])
+                    row2_long.append(row2[j])
+                    row3_long.append(row2[j])
+                # Task ID (cumulative)
+                elif j == 1:
+                    conjoint_task = int(((i-1)/2)+1)
+                    row1_long.append(conjoint_task)
+                    row2_long.append(conjoint_task)
+                    row3_long.append(conjoint_task)
+                # Concept ID
+                elif j == 2:
+                    row1_long.append(row1[j])
+                    row2_long.append(row2[j])
+                    row3_long.append(3)
+                # goals 3, tracking 4, reinforcement 5, self-efficay 6, social support 7, provider 8
+                elif 3 <= j <= 8:
+                    # to list() is mandatory, because append works only for lists not numpy arrays
+                    row1_long = np.concatenate((row1_long, choices.get(row1[j])), axis=None).tolist()
+                    row2_long = np.concatenate((row2_long, choices.get(row2[j])), axis=None).tolist()
+                    row3_long = np.concatenate((row3_long, [0, 0, 0, 0]), axis=None).tolist()
+                # none option level
+                elif j == 9:
+                    row1_long.append(0)
+                    row2_long.append(0)
+                    row3_long.append(1)
+                # selected, if case ow1[j] == 0 & row2[j] == 0: none option is selected
+                elif j == 10:
+                    # If concept 1 and concept 2 is not selected, concept 3 'none' is selected
+                    if row1[j] == 0 and row2[j] == 0:
                         row1_long.append(0)
                         row2_long.append(0)
                         row3_long.append(1)
-                    # selected, if case ow1[j] == 0 & row2[j] == 0: none option is selected
-                    elif j == 10:
-                        # If concept 1 and concept 2 is not selected, concept 3 'none' is selected
-                        if row1[j] == 0 and row2[j] == 0:
-                            row1_long.append(0)
-                            row2_long.append(0)
-                            row3_long.append(1)
-                        else:
-                            row1_long.append(row1[j])
-                            row2_long.append(row2[j])
-                            row3_long.append(0)
-                rows_list.append(row1_long)
-                rows_list.append(row2_long)
-                rows_list.append(row3_long)
+                    else:
+                        row1_long.append(row1[j])
+                        row2_long.append(row2[j])
+                        row3_long.append(0)
+            rows_list.append(row1_long)
+            rows_list.append(row2_long)
+            rows_list.append(row3_long)
     return rows_list
 
 
@@ -105,7 +110,7 @@ if __name__ == '__main__':
     # reading holdouts, 3 holdout tasks each respondent
     holdouts = pd.read_csv("cbca_holdouts.CSV", delimiter=";")
     # reading a list of respondents im interested in (filtering done by spss)
-    conditionCSV = "seg_females.csv"
+    conditionCSV = "seg_adoption_nonuser.csv"
     interested_respondents = pd.read_csv(conditionCSV)
     # addtional Information for CBCA
     # tasks = 7
@@ -152,12 +157,15 @@ if __name__ == '__main__':
     for resp in always_none_respondents:
         valid_respondents.append(resp)
 
+    respondents_conditioned = np.intersect1d(valid_respondents, interested_respondents)
+    valid_profiles = full_profile[full_profile['Response ID'].isin(respondents_conditioned)]
+
     # final dataset header in long format (including levels not attributes)
     final_arr = np.concatenate((['Response ID', 'Task ID', 'Concept ID'], goals_level, tracking_level,
                                 reinforcement_level, selfefficay_level, socialsupport_level,
                                 provider_level, ['none', 'selected']), axis=None).tolist()
     # getting Data into long format, adding None options
-    long_format = (to_long_format(full_profile, (np.intersect1d(valid_respondents, interested_respondents))))
+    long_format = to_long_format(valid_profiles)
     df_final = pd.DataFrame(long_format, columns=final_arr)
 
     # adding time variable for Cox Regression (Backhaus et.al) (-(selected-2))
@@ -169,5 +177,6 @@ if __name__ == '__main__':
     # Summary for complete Dataset not on filtered one
     print("Number of respondents: " + str(len(all_respondents)))
     print("Number of consistent respondents: " + str(len(valid_respondents)))
+    print("Number of respondents after segmentation: " + str(len(pd.unique(valid_profiles["Response ID"]))))
     print("ValidationRate = " + str(round(((len(valid_respondents) / len(all_respondents)) * 100), 2))
           + "% of all respondents are consistent in their holdout selection")
